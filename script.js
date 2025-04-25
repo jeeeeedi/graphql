@@ -1,65 +1,257 @@
-document.getElementById('loginForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
+const API_URL = "https://01.gritlab.ax";
+// Or wherever your backend is running
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+// DOM helpers
+function toggleVisibility(elementId, visible) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = visible ? "block" : "none";
+    }
+}
 
-    // Encode credentials in Base64 for Basic Authentication
-    const credentials = btoa(`${username}:${password}`);
+function setMessage(message) {
+    const messageElement = document.getElementById("message");
+    messageElement.innerText = message;
+    // Clear after 3 seconds
+    setTimeout(() => {
+        messageElement.innerText = "";
+    }, 3000);
+}
+
+// Authentication functions
+async function login(e) {
+    e.preventDefault();
+
+    const usernameOrEmail = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if (!usernameOrEmail || !password) {
+        setMessage("Please provide both username/email and password.");
+        return;
+    }
 
     try {
-        // Fetch JWT from the signin endpoint
-        const response = await fetch('https://01.gritlab.ax/api/auth/signin', {
-            method: 'POST',
+        const credentials = btoa(`${usernameOrEmail}:${password}`);
+        const res = await fetch(`${API_URL}/api/auth/signin`, {
+            method: "POST",
             headers: {
-                'Authorization': `Basic ${credentials}`
-            }
+                "Authorization": `Basic ${credentials}`,
+                "Content-Type": "application/json",
+            },
         });
 
-        if (!response.ok) {
-            throw new Error('Invalid credentials');
+        if (!res.ok) {
+            if (res.status === 401) {
+                setMessage("Invalid credentials. Please try again.");
+            } else {
+                setMessage("Failed to login. Please try later.");
+            }
+            return;
         }
 
-        const data = await response.json();
-        const jwt = data.token; // Assuming the token is returned as `token`
+        const accessToken = await res.json();
+        localStorage.setItem("accessToken", accessToken);
+        setMessage("Logged in!");
 
-        // Use the JWT to fetch GraphQL data
-        fetchGraphQL(jwt);
+        toggleVisibility("logout-button", true);
+        toggleVisibility("login-form", false);
+
+        // Fetch user data after login
+        const query = `
+        query {
+          user {
+            id
+            login
+          }
+        }
+        `;
+
+        /* const userData =  */await fetchGraphQL(query);
+        /*         if (userData && userData.data && userData.data.user) {
+                    const { id, login } = userData.data.user;
+        
+                    // Ensure the login matches the username
+                    if (login !== usernameOrEmail) {
+                        setMessage("Login mismatch. Please try again.");
+                        logout();
+                        return;
+                    }
+                } */
+        await fetchStats();
     } catch (error) {
-        document.getElementById('errorMessage').textContent = error.message;
+        console.error("Login failed:", error);
+        setMessage("Login error occurred!");
     }
+}
+
+/* async function refreshToken() {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include", // Include cookies
+    });
+
+    if (res.ok) {
+        const { accessToken } = await res.json();
+        localStorage.setItem("accessToken", accessToken);
+        return accessToken;
+    }
+
+    // Handle refresh failure
+    localStorage.removeItem("accessToken");
+    setMessage("Session expired. Please log in again.");
+    toggleVisibility("login-form", true);
+    toggleVisibility("logout-button", false);
+    throw new Error("Failed to refresh token");
+} */
+
+/* async function fetchSecret() {
+    let token = localStorage.getItem("accessToken");
+    if (!token) {
+        setMessage("Please log in first");
+        return;
+    }
+
+    try {
+        // First attempt
+        let res = await fetch(`${API_URL}/protected/secret`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+        });
+
+        // If the token has expired or is invalid, try refreshing
+        if (!res.ok) {
+            token = await refreshToken();
+            res = await fetch(`${API_URL}/protected/secret`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: "include",
+            });
+        }
+
+        if (res.ok) {
+            const data = await res.json();
+            setMessage(data.message);
+        } else {
+            setMessage("Failed to fetch secret.");
+        }
+    } catch (error) {
+        console.error("Error in fetchSecret:", error);
+        setMessage("Error occurred while fetching secret.");
+    }
+} */
+
+async function fetchGraphQL(query) {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+        setMessage("Please log in first");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/api/graphql-engine/v1/graphql`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ query }),
+        });
+
+        if (!res.ok) {
+            if (res.status === 401) {
+                setMessage("Session expired. Please log in again.");
+                logout();
+            } else {
+                setMessage("Failed to fetch data.");
+            }
+            return;
+        }
+
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error("Error in fetchGraphQL:", error);
+        setMessage("Error occurred while fetching data.");
+    }
+}
+
+export function logout() {
+    localStorage.removeItem("accessToken");
+    toggleVisibility("logout-button", false);
+    toggleVisibility("login-form", true);
+    setMessage("Logged out!");
+}
+
+// Initialize
+document.addEventListener("DOMContentLoaded", async () => {
+    // Setup login listener
+    document.getElementById("login-form").addEventListener("submit", login);
+
+    // If we already have a token, attempt to use it
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+        try {
+            await fetchSecret();
+            toggleVisibility("login-form", false);
+            toggleVisibility("logout-button", true);
+        } catch (error) {
+            // If the token is invalid, reset everything
+            logout();
+        }
+    }
+
+    // Hide the loader, show content
+    toggleVisibility("loader", false);
+    document.getElementById("content").style.display = "block";
 });
 
+// Expose logout globally
+window.logout = logout;
 
-
-function fetchGraphQL(jwt) {
+async function fetchStats() {
     const query = `
-  query {
-  user {
-    id
-    login
-  }
-}
-`;
+        query {
+            user {
+                login
+            }
+            transaction {
+                type
+                amount
+            }
+            progress {
+                grade
+            }
+            audit {
+                grade
+            }
+        }
+    `;
 
-    fetch('https://01.gritlab.ax/api/graphql-engine/v1/graphql', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}` // Add the JWT here
-        },
-        body: JSON.stringify({ query })
-    })
-        .then(res => res.json())
-        .then(data => {
-            console.log("fetchedData:", data);
-            const stats = document.getElementById('stats');
-           stats.innerHTML = data;
-           /*   data.data.users.forEach(user => {
-                const statDiv = document.createElement('div');
-                statDiv.textContent = `ID: ${user.id}, Name: ${user.login}`;
-                stats.appendChild(statDiv);
-            }); */
-        })
-        .catch(error => console.error('Error:', error));
+
+    let stats = await fetchGraphQL(query);
+    console.log("stats", stats)
+    document.getElementById('stats').style.display = "block";
+    document.getElementById('login').textContent = stats.data.user[0].login || 'N/A';
+    document.getElementById('xp').textContent = stats.data.transaction.amount || 'N/A';
+    document.getElementById('progress-grade').textContent = stats.data.progress.grade || 'N/A';
+
+
+    let totalAuditGrade, auditRatio = calcAudit(stats.data.audit)
+
+    document.getElementById('total-audit-grade').textContent = totalAuditGrade || 'N/A';
+    document.getElementById('audit-ratio').textContent = auditRatio || 'N/A';
+
+
+}
+
+function calcAudit(audit) {
+    console.log(audit)
+
+    const totalAuditGrade = audit.reduce((total, i) => total + i.grade, 0);
+
+    const auditRatio = Math.ceil((totalAuditGrade / audit.length)* 10) / 10;
+    return totalAuditGrade, auditRatio;
 }

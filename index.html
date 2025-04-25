@@ -6,24 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My GraphQL</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="heart.png">
 </head>
 
 <body>
 
     <div class="topnav">
-    <div class="login">
+        <!--     <div class="login">
         <form id="loginForm">
             <input type="text" id="username" placeholder="Username or Email" required>
             <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
         <p id="errorMessage" style="color: red;"></p>
-    </div>
-    </div>
-    
-    <div class="stats" id="stats">
-        <h2>Stats</h2>
+    </div> -->
+        <div id="loader">Loading...</div>
+        <div id="content" style="display: none;">
+            <form id="login-form">
+                <h2>Login</h2>
+                <input id="username" placeholder="Username" />
+                <input id="password" type="password" placeholder="Password" />
+                <button type="submit">Login</button>
+            </form>
 
+            <!-- <button id="secret-button" onclick="fetchSecret()">Get Secret</button> -->
+            <button id="logout-button" onclick="logout()" style="display: none;">
+                Logout
+            </button>
+
+            <p id="message"></p>
+        </div>
+    </div>
+
+    <div class="stats" id="stats" style="display: none;">
+        <h2>Stats</h2>
+        <p><strong>User:</strong> <span id="login"></span></p>
+        <p><strong>XP:</strong> <span id="xp"></span></p>
+        <p><strong>Grade:</strong> <span id="progress-grade"></span></p>
+        <p><strong>Total Audit Grade:</strong> <span id="total-audit-grade"></span></p>
+        <p><strong>Audit Ratio:</strong> <span id="audit-ratio"></span></p>
     </div>
 
     <div class="graphs">
