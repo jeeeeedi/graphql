@@ -42,6 +42,11 @@ body {
     padding: 14px 16px;
 }
 
+/* .topnav .logout-button {
+    float: right;
+    padding: 14px 16px;
+} */
+
 /* Style the content */
 .content {
     background-color: #333;

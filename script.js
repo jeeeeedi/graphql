@@ -233,25 +233,31 @@ async function fetchStats() {
 
     let stats = await fetchGraphQL(query);
     console.log("stats", stats)
+    document.getElementById("welcome").textContent = `Welcome ${stats.data.user[0].login}!`;
     document.getElementById('stats').style.display = "block";
-    document.getElementById('login').textContent = stats.data.user[0].login || 'N/A';
-    document.getElementById('xp').textContent = stats.data.transaction.amount || 'N/A';
-    document.getElementById('progress-grade').textContent = stats.data.progress.grade || 'N/A';
+    document.getElementById('login').textContent = stats.data.user[0].login;
 
 
-    let totalAuditGrade, auditRatio = calcAudit(stats.data.audit)
+    let totalXP = stats.data.transaction.reduce((total, i) => total + i.amount, 0);
+    document.getElementById('xp').textContent = totalXP;
 
-    document.getElementById('total-audit-grade').textContent = totalAuditGrade || 'N/A';
-    document.getElementById('audit-ratio').textContent = auditRatio || 'N/A';
+    let totalProgGrade = Math.ceil(stats.data.progress.reduce((total, i) => total + i.grade, 0));
+    //let progRatio = Math.ceil((totalProgGrade / stats.data.progress.length) * 10) / 10;
+    document.getElementById('progress-grade').textContent = totalProgGrade;
 
+    let totalAuditGrade = Math.ceil(stats.data.audit.reduce((total, i) => total + i.grade, 0));
+    let auditRatio = Math.ceil((totalAuditGrade / stats.data.audit.length) * 10) / 10;
+    document.getElementById('total-audit-grade').textContent = totalAuditGrade;
+    document.getElementById('audit-ratio').textContent = auditRatio;
 
 }
 
 function calcAudit(audit) {
-    console.log(audit)
-
     const totalAuditGrade = audit.reduce((total, i) => total + i.grade, 0);
 
-    const auditRatio = Math.ceil((totalAuditGrade / audit.length)* 10) / 10;
-    return totalAuditGrade, auditRatio;
+    const auditRatio = Math.ceil((totalAuditGrade / audit.length) * 10) / 10;
+
+    console.log("totalgrade & auditRatio", Math.ceil(totalAuditGrade), auditRatio)
+
+    return Math.ceil(totalAuditGrade), auditRatio;
 }
