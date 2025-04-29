@@ -215,18 +215,21 @@ async function fetchStats() {
     const query = `
         query {
             user {
-                login
-            }
-            transaction {
-                type
-                amount
-            }
-            progress {
-                grade
-            }
-            audit {
-                grade
-            }
+    login
+    auditRatio
+  }
+  transaction_aggregate(
+    where: {
+      type: { _eq: "xp" },
+      event: { id: { _eq: 104 } }
+    }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
         }
     `;
 
@@ -237,27 +240,10 @@ async function fetchStats() {
     document.getElementById('stats').style.display = "block";
     document.getElementById('login').textContent = stats.data.user[0].login;
 
+    document.getElementById('xp').textContent = Math.ceil(stats.data.transaction_aggregate.aggregate.sum.amount);
+    //592500;
 
-    let totalXP = stats.data.transaction.reduce((total, i) => total + i.amount, 0);
-    document.getElementById('xp').textContent = totalXP;
-
-    let totalProgGrade = Math.ceil(stats.data.progress.reduce((total, i) => total + i.grade, 0));
-    //let progRatio = Math.ceil((totalProgGrade / stats.data.progress.length) * 10) / 10;
     document.getElementById('progress-grade').textContent = totalProgGrade;
 
-    let totalAuditGrade = Math.ceil(stats.data.audit.reduce((total, i) => total + i.grade, 0));
-    let auditRatio = Math.ceil((totalAuditGrade / stats.data.audit.length) * 10) / 10;
     document.getElementById('total-audit-grade').textContent = totalAuditGrade;
-    document.getElementById('audit-ratio').textContent = auditRatio;
-
-}
-
-function calcAudit(audit) {
-    const totalAuditGrade = audit.reduce((total, i) => total + i.grade, 0);
-
-    const auditRatio = Math.ceil((totalAuditGrade / audit.length) * 10) / 10;
-
-    console.log("totalgrade & auditRatio", Math.ceil(totalAuditGrade), auditRatio)
-
-    return Math.ceil(totalAuditGrade), auditRatio;
-}
+    document.getElementById('audit-ratio').textContent = Math.ceil(stats.data.user[0].auditRatio);
