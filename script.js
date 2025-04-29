@@ -1,3 +1,5 @@
+import { fetchChartData } from "./chart.js";
+
 const API_URL = "https://01.gritlab.ax";
 // Or wherever your backend is running
 
@@ -78,6 +80,7 @@ async function login(e) {
                     }
                 } */
     await fetchStats();
+    await fetchChartData();
   } catch (error) {
     console.error("Login failed:", error);
     setMessage("Login error occurred!");
@@ -143,7 +146,7 @@ async function login(e) {
     }
 } */
 
-async function fetchGraphQL(query) {
+export async function fetchGraphQL(query) {
   const token = localStorage.getItem("accessToken");
   if (!token) {
     setMessage("Please log in first");
@@ -238,7 +241,6 @@ async function fetchStats() {
     `;
 
   let stats = await fetchGraphQL(query);
-  console.log("stats", stats);
   document.getElementById(
     "welcome"
   ).textContent = `Welcome ${stats.data.user[0].login}!`;
