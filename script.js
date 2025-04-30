@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Hide the loader, show content
   toggleVisibility("loader", false);
-  document.getElementById("content").style.display = "block";
+  document.getElementById("auth").style.display = "block";
 });
 
 // Expose logout globally
@@ -241,6 +241,7 @@ async function fetchStats() {
     `;
 
   let stats = await fetchGraphQL(query);
+  console.log("stats:", stats);
   document.getElementById(
     "welcome"
   ).textContent = `Welcome ${stats.data.user[0].login}!`;

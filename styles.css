@@ -5,14 +5,12 @@
     background-color: #333;
     color: whitesmoke;
 
-
     font-family: "Martian Mono", monospace;
     font-optical-sizing: auto;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    margin: 1rem;
 }
 
 /* Style the top navigation bar */
@@ -48,15 +46,58 @@ body {
 } */
 
 /* Style the content */
-.content {
+/* .content {
     background-color: #333;
     padding: 10px;
     height: 200px;
-    /* Should be removed. Only for demonstration */
-}
+    /* Should be removed. Only for demonstration 
+} */
 
 /* Style the footer */
-.footer {
+.footer, .footer p {
+    padding-top: 1rem;
     background-color:#333;
-    padding: 10px;
+    font-size: 10px;
+    color: darkgray;
+}
+.footer a {
+    text-decoration: none;
+    color: darkgray;
+}
+
+/* SVG */
+.graphs #project-info {
+    margin-top: 20px;
+}
+
+#project-chart text {
+    font-size: 10px;
+    color: white;
+}
+
+/* Style for the SVG container */
+/* #user-chart {
+    background-color: #222; /* Dark background for contrast
+    border: 1px solid #444; /* Optional border
+} */
+
+/* Style for the circles */
+#user-chart circle {
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: transform 0.3s ease, fill 0.3s ease, filter 0.3s ease; /* Smooth scaling and glow effect */
+}
+
+/* Hover effect for circles */
+#user-chart circle:hover {
+    transform: scale(1.2); /* Slightly enlarge the circle */
+    fill: gray; /* Change color on hover */
+    filter: drop-shadow(0 0 10px darkgray); /* Add a glowing effect */
+}
+
+/* Style for the text inside circles */
+#user-chart text {
+    font-size: 0.75rem;
+    fill: white; /* Text color */
+    pointer-events: none; /* Prevent text from interfering with circle hover */
+    text-wrap: wrap;
 }

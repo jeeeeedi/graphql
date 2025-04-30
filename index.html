@@ -21,7 +21,7 @@
         <p id="errorMessage" style="color: red;"></p>
     </div> -->
         <div id="loader">Loading...</div>
-        <div id="content" style="display: none;">
+        <div id="auth" style="display: none;">
             <form id="login-form">
                 <h2>Login</h2>
                 <input id="username" placeholder="Username" />
@@ -47,17 +47,17 @@
         <p><strong>Audit Ratio:</strong> <span id="audit-ratio"></span></p>
     </div>
 
-    <div class="graphs">
+    <div class="graphs" id="graphs" style="display: none;">
         <h2>Graphs</h2>
         <h3>Projects</h3>
-        <svg id="project-chart" width="80%" height="400px" style="border:1px solid #ccc;"></svg>
-        <div id="project-info" style="margin-top: 20px; font-family: Arial, sans-serif;"></div>
+        <svg id="project-chart" width="100%" height="400" style="border:1px solid #ccc;"></svg>
+        <div id="project-info"></div>
         <h3>Group Members</h3>
-
+        <svg id="user-chart" width="100%" height="400"></svg>
     </div>
 
     <div class="footer">
-        <p>Footer</p>
+        <p>GraphQL by <a href="https://github.com/jeeeeedi">Jedi</a></p>
     </div>
 
     <script type="module" src="script.js"></script>
