@@ -10,6 +10,7 @@
 }
 
 body {
+    font-size: 0.7rem; /* Default font size */
     margin: 1rem;
 }
 
@@ -40,24 +41,11 @@ body {
     padding: 14px 16px;
 }
 
-/* .topnav .logout-button {
-    float: right;
-    padding: 14px 16px;
-} */
-
-/* Style the content */
-/* .content {
-    background-color: #333;
-    padding: 10px;
-    height: 200px;
-    /* Should be removed. Only for demonstration 
-} */
-
 /* Style the footer */
 .footer, .footer p {
     padding-top: 1rem;
     background-color:#333;
-    font-size: 10px;
+    font-size: 0.5rem;
     color: darkgray;
 }
 .footer a {
@@ -70,34 +58,44 @@ body {
     margin-top: 20px;
 }
 
-#project-chart text {
-    font-size: 10px;
-    color: white;
+#project-chart {
+    background-color: #222; /* Dark background for contrast */
+    border: 1px solid #444; /* Optional border */
 }
 
-/* Style for the SVG container */
-/* #user-chart {
-    background-color: #222; /* Dark background for contrast
-    border: 1px solid #444; /* Optional border
+#project-chart text {
+    font-size: 0.25rem;
+    fill: white;
+}
+
+#project-chart line {
+    stroke: gray;
+    opacity: 0.5; /* Line opacity */
+    stroke-width: 0.5;
+}
+
+#project-chart circle {
+    r: 2; /* Circle radius */
+    cursor: pointer;
+}
+#project-chart circle:hover {
+    filter: drop-shadow(0 0 2px white); /* Add a glowing effect */
+}
+
+/* #member-chart circle {
 } */
 
-/* Style for the circles */
-#user-chart circle {
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: transform 0.3s ease, fill 0.3s ease, filter 0.3s ease; /* Smooth scaling and glow effect */
-}
-
 /* Hover effect for circles */
-#user-chart circle:hover {
-    transform: scale(1.2); /* Slightly enlarge the circle */
+#member-chart circle:hover {
     fill: gray; /* Change color on hover */
     filter: drop-shadow(0 0 10px darkgray); /* Add a glowing effect */
 }
 
 /* Style for the text inside circles */
-#user-chart text {
-    font-size: 0.75rem;
-    fill: white; /* Text color */
+#member-chart text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    stroke-width: 0.2px; /* Thickness of the outline */
     pointer-events: none; /* Prevent text from interfering with circle hover */
     text-wrap: wrap;
 }

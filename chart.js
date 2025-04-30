@@ -10,6 +10,7 @@ export async function fetchChartData() {
             name
           }
           grade
+          createdAt
           updatedAt
           group {
         members {
@@ -24,7 +25,7 @@ export async function fetchChartData() {
   let chartData = await fetchGraphQL(query);
   console.log("chartData", chartData);
   document.getElementById("graphs").style.display = "block";
-  makeGraph(chartData)
+  makeGraph(chartData);
   makeChart(chartData);
 }
 function makeGraph(chartData) {
@@ -32,7 +33,9 @@ function makeGraph(chartData) {
   const projectData = chartData.data.user[0].progresses.map((progress) => ({
     name: progress.object.name,
     grade: progress.grade,
+    createdAt: progress.createdAt,
     updatedAt: progress.updatedAt,
+    members: progress.group.members,
   }));
 
   // Use projectData for further processing (e.g., rendering the chart)
@@ -40,6 +43,9 @@ function makeGraph(chartData) {
   const width = svg.clientWidth;
   const height = svg.clientHeight;
   const margin = 40;
+
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
   // Parse dates
   const parsedData = projectData.map((d) => ({
@@ -69,6 +75,9 @@ function makeGraph(chartData) {
     );
   }
 
+  // Clear existing SVG content
+  svg.innerHTML = "";
+
   // === Draw Y-Axis (grades) ===
   const yTicks = [];
   for (
@@ -87,7 +96,6 @@ function makeGraph(chartData) {
     line.setAttribute("x2", width - margin);
     line.setAttribute("y1", y);
     line.setAttribute("y2", y);
-    line.setAttribute("stroke", "#eee");
     svg.appendChild(line);
 
     // grade label
@@ -117,7 +125,6 @@ function makeGraph(chartData) {
     line.setAttribute("x2", x);
     line.setAttribute("y1", margin);
     line.setAttribute("y2", height - margin);
-    line.setAttribute("stroke", "#eee");
     svg.appendChild(line);
 
     // month label
@@ -138,9 +145,11 @@ function makeGraph(chartData) {
   parsedData.forEach((d, i) => {
     const x = scaleX(d.date);
     const y = scaleY(d.grade);
-
     // Create a point (dot)
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const circle = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
     //circle.setAttribute("cx", x);
     circle.setAttribute("cy", y);
 
@@ -152,17 +161,15 @@ function makeGraph(chartData) {
 
       // Add 20px offset if the difference exceeds 10
       if (dateDiff < 10000000 && gradeDiff <= 0.1) {
-        offsetX = 8;
+        offsetX = 4;
       }
       circle.setAttribute("cx", x + offsetX);
     } else {
       circle.setAttribute("cx", x);
     }
 
-
-    circle.setAttribute("r", 4);
-    circle.setAttribute("fill", "blue");
-    circle.style.cursor = "pointer"; // Make it look clickable
+    const randomColor = `hsl(${Math.random() * 360}, 100%, 50%)`; // Generate a random neon-like color
+    circle.setAttribute("fill", randomColor); // Apply the random color
     svg.appendChild(circle);
 
     // Add click event listener to the dot
@@ -173,89 +180,124 @@ function makeGraph(chartData) {
         <p><strong>Grade:</strong> ${d.grade}</p>
         <p><strong>Completed:</strong> ${new Date(d.date).toLocaleString()}</p>
       `;
-      glowFriends(chartData);
+      findMembers(d.name, d.members, randomColor);
     });
 
     // Draw a line to the previous point
     if (i > 0) {
       const prev = parsedData[i - 1];
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+      );
       line.setAttribute("x1", scaleX(prev.date) + offsetX);
       line.setAttribute("y1", scaleY(prev.grade));
       line.setAttribute("x2", x + offsetX);
       line.setAttribute("y2", y);
-      line.setAttribute("stroke", "#aaa");
       svg.appendChild(line);
     }
   });
 }
-function glowFriends(chartData) {
-   // Highlight group members in the user-chart
-   const userChart = document.getElementById("user-chart");
-   const groupMembers = d.group.members.map((member) => member.userLogin);
- 
-   // Reset all circles in user-chart
-   const userCircles = userChart.querySelectorAll("circle");
-   userCircles.forEach((circle) => {
-     circle.setAttribute("fill", "black"); // Default color
-     circle.setAttribute("stroke", "none"); // Remove highlight
-   });
- 
-   // Highlight circles for group members
-   groupMembers.forEach((member) => {
-     const memberCircle = Array.from(userCircles).find((circle) => {
-       const text = userChart.querySelector(
-         `text[x="${circle.getAttribute("cx")}"][y="${circle.getAttribute("cy")}"]`
-       );
-       return text && text.textContent === member;
-     });
- 
-     if (memberCircle) {
-       memberCircle.setAttribute("fill", "red"); // Highlight color
-       memberCircle.setAttribute("stroke", "yellow"); // Add stroke for emphasis
-       memberCircle.setAttribute("stroke-width", "2");
-     }
-   });
+function findMembers(projectName, members, randomColor) {
+  // Highlight group members in the member-chart
+  const userChart = document.getElementById("member-chart");
+
+  // Reset all circles in member-chart
+  const userCircles = userChart.querySelectorAll("circle");
+  userCircles.forEach((circle) => {
+    circle.setAttribute("fill", "black"); // Default color
+    circle.setAttribute("stroke", "none"); // Remove highlight
+  });
+
+  // Highlight circles for group members
+  members.forEach((member) => {
+    const memberCircle = userChart.querySelector(
+      `circle[id="${member.userLogin}"]`
+    );
+    if (memberCircle) {
+      memberCircle.setAttribute("fill", randomColor); // Highlight color
+    }
+
+    const memberText = userChart.querySelector(
+      `text[id="${member.userLogin}"]`
+    );;
+    if (memberText) {
+      memberText.removeAttribute("fill");
+      memberText.setAttribute("fill", "black"); // Set text color to black
+    }
+  });
 }
 function makeChart(chartData) {
   const memberData = chartData.data.user[0].progresses.map((progress) => ({
     name: progress.object.name,
     members: progress.group.members,
   }));
-  console.log(memberData);
 
-  const myLogin = chartData.data.user[0].login;
+  //const myLogin = chartData.data.user[0].login;
 
   // Extract unique userLogins
-  const friends = memberData
+  const members = memberData
     .flatMap((data) => data.members.map((member) => member.userLogin))
-    .filter((userLogin) => userLogin !== myLogin) // Exclude current user's login
+    //.filter((userLogin) => userLogin !== myLogin) // Exclude current user's login
     .reduce((counts, userLogin) => {
       counts[userLogin] = (counts[userLogin] || 0) + 1;
       return counts;
     }, {});
 
   // Convert to an array of unique userLogins with their counts
-  const friendsWithCounts = Object.entries(friends).map(
+  const membersWithCount = Object.entries(members).map(
     ([userLogin, count]) => ({ userLogin, count })
   );
 
-  console.log(friendsWithCounts);
-
   // Create SVG circles
-  const svg = document.getElementById("user-chart");
+  const svg = document.getElementById("member-chart");
   const width = svg.clientWidth;
   const height = svg.clientHeight;
+  const margin = 40;
 
-  const maxCount = Math.max(...friendsWithCounts.map((u) => u.count));
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+  // Parse dates and calculate scales
+  const parsedData = chartData.data.user[0].progresses.map((progress) => ({
+    ...progress,
+    date: new Date(progress.updatedAt).getTime(),
+  }));
+  parsedData.sort((a, b) => a.date - b.date);
+
+  const minDate = parsedData[0].date;
+  const maxDate = parsedData[parsedData.length - 1].date;
+  const minGrade =
+    Math.floor(Math.min(...parsedData.map((d) => d.grade)) * 10) / 10;
+  const maxGrade =
+    Math.ceil(Math.max(...parsedData.map((d) => d.grade)) * 10) / 10;
+
+  function scaleX(date) {
+    return (
+      margin + ((date - minDate) / (maxDate - minDate)) * (width - 2 * margin)
+    );
+  }
+
+  function scaleY(grade) {
+    return (
+      height -
+      margin -
+      ((grade - minGrade) / (maxGrade - minGrade)) * (height - 2 * margin)
+    );
+  }
+
+  // Clear existing SVG content
+  svg.innerHTML = "";
+
+  const maxCount = Math.max(...membersWithCount.map((u) => u.count));
   const minRadius = 40; // Minimum circle radius
-  const maxRadius = friendsWithCounts.length * 10; // Maximum circle radius
+  const maxRadius = membersWithCount.length * 10; // Maximum circle radius
 
   const circles = [];
 
-  friendsWithCounts.forEach((user, index) => {
+  membersWithCount.forEach((user, index) => {
     const radius =
-      minRadius + ((user.count / maxCount) * (maxRadius - minRadius));
+      minRadius + (user.count / maxCount) * (maxRadius - minRadius);
 
     let x, y;
     let isOverlapping;
@@ -269,15 +311,8 @@ function makeChart(chartData) {
       let angle = 0;
       let distance = radius * 2; // Start with a distance equal to the diameter
       do {
-        angle += Math.PI / 6; // Increment angle to try a new position
-        if (angle >= 2 * Math.PI) {
-          angle = 0;
-          distance += 5; // Increase distance if no valid position is found
-        }
-
-        const lastCircle = circles[circles.length - 1];
-        x = lastCircle.x + Math.cos(angle) * distance;
-        y = lastCircle.y + Math.sin(angle) * distance;
+        x = width / 2 + Math.cos(angle) * distance; // Calculate x based on angle and distance
+        y = height / 2 + Math.sin(angle) * distance; // Calculate y based on angle and distance
 
         // Ensure the circle stays within bounds
         x = Math.max(radius, Math.min(x, width - radius));
@@ -289,6 +324,12 @@ function makeChart(chartData) {
           const distanceBetween = Math.sqrt(dx * dx + dy * dy);
           return distanceBetween < circle.radius + radius; // Check if circles overlap
         });
+
+        angle += Math.PI / 12; // Increment angle for clockwise rotation
+        if (angle >= 2 * Math.PI) {
+          angle -= 2 * Math.PI; // Keep angle within 0 to 2π
+          distance += 10; // Gradually increase the distance for the spiral effect
+        }
       } while (isOverlapping);
     }
 
@@ -296,11 +337,15 @@ function makeChart(chartData) {
     circles.push({ x, y, radius });
 
     // Create circle
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const circle = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
 
     circle.setAttribute("cx", x);
     circle.setAttribute("cy", y);
     circle.setAttribute("r", radius);
+    circle.setAttribute("id", user.userLogin); // Add id with user's login
     svg.appendChild(circle);
 
     // Add text inside the circle
@@ -308,6 +353,8 @@ function makeChart(chartData) {
     text.setAttribute("x", x);
     text.setAttribute("y", y + 5); // Adjust text position
     text.setAttribute("text-anchor", "middle");
+    text.setAttribute("fill", "white");
+    text.setAttribute("id", user.userLogin);
     text.textContent = user.userLogin;
     svg.appendChild(text);
   });
