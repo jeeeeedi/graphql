@@ -13,6 +13,9 @@ body {
     font-size: 0.7rem; /* Default font size */
     margin: 1rem;
 }
+h1, h2, h3 {
+    text-align: center;
+}
 
 /* Style the top navigation bar */
 .topnav {
@@ -54,17 +57,42 @@ body {
 }
 
 /* SVG */
-.graphs #project-info {
-    margin-top: 20px;
+.graphs {
+    display: flex;
+    justify-content: center; /* Horizontally center the content */
+    align-items: center;
+}
+
+#project-info {
+    margin: 0 auto;
+    background-color: #222; /* Dark background for contrast */
+    border: 1px solid #444; /* Optional border */
+    padding: 20px;
+    width: fit-content;
+    white-space: nowrap; /* Prevent text wrapping if necessary */
+}
+#project-info p, #project-info strong {
+    background-color: #222; /* Dark background for contrast */
 }
 
 #project-chart {
+    display: flex;
+    justify-content: center; /* Horizontally center the content */
+    align-items: center;
+    margin: 0 auto;
+    padding: 40px;
     background-color: #222; /* Dark background for contrast */
     border: 1px solid #444; /* Optional border */
+    max-width: 1200px; /* Set maximum width */
+    min-width: 400px; /* Set minimum width */
+    max-height: 1200px; /* Set maximum width */
+    min-height: 400px; /* Set minimum width */
+    width: 100%; /* Allow it to scale within the range */
+    height: 100%;
 }
 
 #project-chart text {
-    font-size: 0.25rem;
+    font-size: clamp(0,25rem, 0.5rem, 1rem);
     fill: white;
 }
 
@@ -75,7 +103,7 @@ body {
 }
 
 #project-chart circle {
-    r: 2; /* Circle radius */
+    r: 6; /* Dot radius */
     cursor: pointer;
 }
 #project-chart circle:hover {
@@ -83,11 +111,12 @@ body {
 }
 
 /* #member-chart circle {
+    fill: #222;
 } */
 
 /* Hover effect for circles */
 #member-chart circle:hover {
-    fill: gray; /* Change color on hover */
+    fill: rgb(149, 155, 191); /* Change color on hover */
     filter: drop-shadow(0 0 10px darkgray); /* Add a glowing effect */
 }
 

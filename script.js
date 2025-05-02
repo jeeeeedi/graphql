@@ -260,5 +260,5 @@ async function fetchStats() {
     stats.data.transaction_aggregate.aggregate.count;
 
   document.getElementById("audit-ratio").textContent =
-    Math.ceil(stats.data.user[0].auditRatio * 10) / 10;
+    Math.round(stats.data.user[0].auditRatio * 10) / 10;
 }
