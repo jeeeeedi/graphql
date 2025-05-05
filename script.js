@@ -33,6 +33,7 @@ async function login(e) {
   }
 
   try {
+    // Encode credentials in Base64 for Basic Authentication
     const credentials = btoa(`${usernameOrEmail}:${password}`);
     const res = await fetch(`${API_URL}/api/auth/signin`, {
       method: "POST",
