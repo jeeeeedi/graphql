@@ -118,6 +118,7 @@ export async function fetchGraphQL(query) {
 
 export function logout() {
   localStorage.removeItem("accessToken");
+  localStorage.removeItem("jwt");
   toggleVisibility("logout-button", false);
   toggleVisibility("login-form", true);
   toggleVisibility("welcome", false);
@@ -135,7 +136,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const accessToken = localStorage.getItem("accessToken");
   if (accessToken) {
     try {
-      await fetchSecret();
       toggleVisibility("login-form", false);
       toggleVisibility("logout-button", true);
     } catch (error) {
