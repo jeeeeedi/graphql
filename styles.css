@@ -13,6 +13,7 @@ body {
     font-size: 0.7rem; /* Default font size */
     margin: 1rem;
 }
+
 h1, h2, h3 {
     text-align: center;
 }
@@ -21,6 +22,10 @@ h1, h2, h3 {
 .topnav {
     overflow: hidden;
     background-color: #333;
+}
+
+.topnav h1 {
+    float: left;
 }
 
 /* Style the topnav links */
@@ -39,13 +44,22 @@ h1, h2, h3 {
     color: black;
 }
 
-.topnav .login {
-    float: left;
+.topnav #login-form {
+    float: right;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
     padding: 14px 16px;
+    text-decoration: none;
+}
+
+.topnav button, #message {
+    float: right;
 }
 
 /* Style the footer */
 .footer, .footer p {
+    text-align: center;
     padding-top: 1rem;
     background-color:#333;
     font-size: 0.5rem;
@@ -54,6 +68,60 @@ h1, h2, h3 {
 .footer a {
     text-decoration: none;
     color: darkgray;
+}
+
+/* STATS */
+
+#stats {
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Add space between the boxes */
+    align-items: flex-start; /* Align items at the top */
+    gap: 40px; /* Add spacing between boxes */
+    flex-wrap: nowrap; /* Ensure all boxes stay in one line */
+    width: 100%; /* Ensure the parent container spans the full width */
+    margin: 0 auto; /* Center the container horizontally */
+}
+
+#user-box, #xp-box, #transactions-box, #audit-box {
+    display: block;
+    background-color: #222; /* Dark background for contrast */
+    border: 1px solid #444; /* Optional border */
+    padding: 20px;
+    width: 16%; /* Ensure all boxes have equal width */
+    text-align: center; /* Center text inside the boxes */
+}
+#xp-box p, #transactions-box p, #audit-box p {
+    font-size: 3rem;
+    color: lightgreen;
+    background-color: #333;
+}
+
+table {
+    border-collapse: collapse;
+    background-color: #222; /* Dark background for contrast */
+    border: 1px solid #444; /* Optional border */
+    padding: 20px;
+    max-width: 1200px;
+    min-width: 400px;
+    margin: auto; /* Center the table horizontally */
+
+}
+  
+td, th {
+    background-color: #222; /* Dark background for contrast */
+    width: 300px; /* Ensure all cells have equal width */
+    padding: 10px 20px;
+    text-align: center;
+
+}
+  
+th {
+    font-size: 1rem;
+}
+  
+#xp, #transactions-count, #audit-ratio {
+    font-size: 3rem;
+    color: lightgreen;
 }
 
 /* SVG */

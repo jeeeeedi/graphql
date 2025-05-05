@@ -1,16 +1,16 @@
 import { fetchChartData } from "./chart.js";
 
 const API_URL = "https://01.gritlab.ax";
-// Or wherever your backend is running
 
 // DOM helpers
-function toggleVisibility(elementId, visible) {
+export function toggleVisibility(elementId, visible) {
   const element = document.getElementById(elementId);
   if (element) {
     element.style.display = visible ? "block" : "none";
   }
 }
 
+// Alert message
 function setMessage(message) {
   const messageElement = document.getElementById("message");
   messageElement.innerText = message;
@@ -57,6 +57,9 @@ async function login(e) {
 
     toggleVisibility("logout-button", true);
     toggleVisibility("login-form", false);
+    toggleVisibility("welcome", true);
+    toggleVisibility("stats", true);
+    toggleVisibility("graphs", true);
 
     // Fetch user data after login
     const query = `
@@ -68,17 +71,7 @@ async function login(e) {
         }
         `;
 
-    /* const userData =  */ await fetchGraphQL(query);
-    /*         if (userData && userData.data && userData.data.user) {
-                    const { id, login } = userData.data.user;
-        
-                    // Ensure the login matches the username
-                    if (login !== usernameOrEmail) {
-                        setMessage("Login mismatch. Please try again.");
-                        logout();
-                        return;
-                    }
-                } */
+    await fetchGraphQL(query);
     await fetchStats();
     await fetchChartData();
   } catch (error) {
@@ -86,65 +79,6 @@ async function login(e) {
     setMessage("Login error occurred!");
   }
 }
-
-/* async function refreshToken() {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include", // Include cookies
-    });
-
-    if (res.ok) {
-        const { accessToken } = await res.json();
-        localStorage.setItem("accessToken", accessToken);
-        return accessToken;
-    }
-
-    // Handle refresh failure
-    localStorage.removeItem("accessToken");
-    setMessage("Session expired. Please log in again.");
-    toggleVisibility("login-form", true);
-    toggleVisibility("logout-button", false);
-    throw new Error("Failed to refresh token");
-} */
-
-/* async function fetchSecret() {
-    let token = localStorage.getItem("accessToken");
-    if (!token) {
-        setMessage("Please log in first");
-        return;
-    }
-
-    try {
-        // First attempt
-        let res = await fetch(`${API_URL}/protected/secret`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-        });
-
-        // If the token has expired or is invalid, try refreshing
-        if (!res.ok) {
-            token = await refreshToken();
-            res = await fetch(`${API_URL}/protected/secret`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                credentials: "include",
-            });
-        }
-
-        if (res.ok) {
-            const data = await res.json();
-            setMessage(data.message);
-        } else {
-            setMessage("Failed to fetch secret.");
-        }
-    } catch (error) {
-        console.error("Error in fetchSecret:", error);
-        setMessage("Error occurred while fetching secret.");
-    }
-} */
 
 export async function fetchGraphQL(query) {
   const token = localStorage.getItem("accessToken");
@@ -185,6 +119,9 @@ export function logout() {
   localStorage.removeItem("accessToken");
   toggleVisibility("logout-button", false);
   toggleVisibility("login-form", true);
+  toggleVisibility("welcome", false);
+  toggleVisibility("stats", false);
+  toggleVisibility("graphs", false);
   setMessage("Logged out!");
 }
 
@@ -208,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Hide the loader, show content
   toggleVisibility("loader", false);
-  document.getElementById("auth").style.display = "block";
+  toggleVisibility("auth", true);
 });
 
 // Expose logout globally
@@ -218,39 +155,38 @@ async function fetchStats() {
   const query = `
         query {
             user {
-    id
-    login
-    firstName
-    lastName
-    auditRatio
-  }
-  transaction_aggregate(
-    where: {
-      type: { _eq: "xp" },
-      event: { id: { _eq: 104 } }
-    }
-  ) {
-    aggregate {
-    count
-      sum {
-        amount
-      }
-    }
-  }
+              id
+              login
+              firstName
+              lastName
+              auditRatio
+            }
+            transaction_aggregate(
+              where: {
+                type: { _eq: "xp" },
+                event: { id: { _eq: 104 } }
+              }
+            ) {
+              aggregate {
+              count
+                sum {
+                  amount
+                }
+              }
+            }
         }
     `;
 
   let stats = await fetchGraphQL(query);
-  console.log("stats:", stats);
   document.getElementById(
     "welcome"
   ).textContent = `Welcome ${stats.data.user[0].login}!`;
-  document.getElementById("stats").style.display = "block";
+  toggleVisibility("stats", true);
   document.getElementById("user").innerHTML = `
-  <p>Username: ${stats.data.user[0].login}</p>
-  <p>User ID: ${stats.data.user[0].id}</p>
-  <p>First Name: ${stats.data.user[0].firstName}</p>
-  <p>Last Name: ${stats.data.user[0].lastName}</p>
+  Username: ${stats.data.user[0].login}</br></br>
+  User ID: ${stats.data.user[0].id}</br></br>
+  First Name: ${stats.data.user[0].firstName}</br></br>
+  Last Name: ${stats.data.user[0].lastName}</br></br>
   `;
 
   document.getElementById("xp").textContent =

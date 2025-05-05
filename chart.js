@@ -1,4 +1,4 @@
-import { fetchGraphQL } from "./script.js";
+import { fetchGraphQL, toggleVisibility } from "./script.js";
 
 let chartData = {};
 let projectData = {};
@@ -17,17 +17,18 @@ export async function fetchChartData() {
           createdAt
           updatedAt
           group {
-        members {
-          userLogin
-        }
-      }
+            members {
+              userLogin
+            }
+          }
         }
       }
     }
     `;
 
   chartData = await fetchGraphQL(query);
-  document.getElementById("graphs").style.display = "block";
+  toggleVisibility("graphs", true);
+
   makeGraph(chartData);
   makeChart(chartData);
 }
@@ -35,7 +36,7 @@ function makeGraph(chartData) {
   // Extract data dynamically from progresses
   projectData = chartData.data.user[0].progresses.map((progress) => ({
     name: progress.object.name,
-    grade: parseFloat(progress.grade.toFixed(10)),
+    grade: progress.grade,
     createdAt: progress.createdAt,
     updatedAt: progress.updatedAt,
     members: progress.group.members,
@@ -118,8 +119,7 @@ function makeGraph(chartData) {
   const end = new Date(maxDate);
   start.setDate(1); // start of month
   end.setDate(1);
-  end.setMonth(end.getMonth());
-  console.log("start, end:", start, end)
+  end.setMonth(end.getMonth() + 1);
 
   for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
     const x = scaleX(d.getTime());
@@ -165,7 +165,7 @@ function makeGraph(chartData) {
       const dateDiff = Math.round(d.date - prev.date) - 100000;
       const gradeDiff = d.grade - prev.grade;
 
-      // Add 20px offset if the difference exceeds 10
+      // Add 20px offset if the difference exceeds 10 (in cases where the dates are the same)
       if (dateDiff < 10000000 && gradeDiff <= 0.1) {
         offsetX = 4;
       }
@@ -181,11 +181,13 @@ function makeGraph(chartData) {
     // Add click event listener to the dot
     circle.addEventListener("click", () => {
       const projectInfoDiv = document.getElementById("project-info");
-      projectInfoDiv.style.display = "block";
+      const roundGrade = d.grade ? parseFloat(d.grade.toFixed(2)) : 0;
+      toggleVisibility("project-info", true);
+
       projectInfoDiv.innerHTML = `
         <p><strong>Project Name:</strong> ${d.name}</p>
-        <p><strong>Grade:</strong> ${d.grade}</p>
-        <p><strong>Completed:</strong> ${new Date(d.date).toLocaleDateString("en-GB", {
+        <p><strong>Grade:</strong> ${roundGrade}</p>
+        <p><strong>Completed / Last Updated Date:</strong> ${new Date(d.date).toLocaleDateString("en-GB", {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -259,12 +261,9 @@ function makeChart(chartData) {
     members: progress.group.members,
   }));
 
-  //const myLogin = chartData.data.user[0].login;
-
   // Extract unique userLogins
   members = memberData
     .flatMap((data) => data.members.map((member) => member.userLogin))
-    //.filter((userLogin) => userLogin !== myLogin) // Exclude current user's login
     .reduce((counts, userLogin) => {
       counts[userLogin] = (counts[userLogin] || 0) + 1;
       return counts;
