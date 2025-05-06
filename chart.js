@@ -82,12 +82,10 @@ function makeGraph(chartData) {
 
   // === Draw Y-Axis (grades) ===
   const yTicks = [];
-  const yRange = height - 2 * margin; // Total height available for the Y-axis
-  const tickSpacing = 40; // Desired spacing between ticks in pixels
   const tickStep = 0.5; // Fixed increment for grade ticks
 
   // Start from the desired minimum value (1 in this case)
-  for (let tick = Math.max(1, Math.ceil(minGrade / tickStep) * tickStep); tick <= maxGrade; tick += tickStep) {
+  for (let tick = Math.max(0, Math.ceil(minGrade / tickStep) * tickStep); tick <= maxGrade + 0.5; tick += tickStep) {
     yTicks.push(tick);
   }
 
@@ -96,8 +94,8 @@ function makeGraph(chartData) {
 
     // horizontal grid line
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", margin);
-    line.setAttribute("x2", width - margin);
+    line.setAttribute("x1", 40);
+    line.setAttribute("x2", width - 40);
     line.setAttribute("y1", y);
     line.setAttribute("y2", y);
 
@@ -128,8 +126,8 @@ function makeGraph(chartData) {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", x);
     line.setAttribute("x2", x);
-    line.setAttribute("y1", margin);
-    line.setAttribute("y2", height - margin);
+    line.setAttribute("y1", 40);
+    line.setAttribute("y2", height - 40);
     svg.appendChild(line);
 
     // month label
@@ -295,20 +293,6 @@ function makeChart(chartData) {
     Math.floor(Math.min(...parsedData.map((d) => d.grade)) * 10) / 10;
   const maxGrade =
     Math.ceil(Math.max(...parsedData.map((d) => d.grade)) * 10) / 10;
-
-  function scaleX(date) {
-    return (
-      margin + ((date - minDate) / (maxDate - minDate)) * (width - 2 * margin)
-    );
-  }
-
-  function scaleY(grade) {
-    return (
-      height -
-      margin -
-      ((grade - minGrade) / (maxGrade - minGrade)) * (height - 2 * margin)
-    );
-  }
 
   // Clear existing SVG content
   svg.innerHTML = "";
