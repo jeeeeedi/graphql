@@ -85,7 +85,7 @@ function makeGraph(chartData) {
   const tickStep = 0.5; // Fixed increment for grade ticks
 
   // Start from the desired minimum value (1 in this case)
-  for (let tick = Math.max(0, Math.ceil(minGrade / tickStep) * tickStep); tick <= maxGrade + 0.5; tick += tickStep) {
+  for (let tick = 0; tick <= maxGrade + 0.5; tick += tickStep) {
     yTicks.push(tick);
   }
 
@@ -287,13 +287,6 @@ function makeChart(chartData) {
   }));
   parsedData.sort((a, b) => a.date - b.date);
 
-  const minDate = parsedData[0].date;
-  const maxDate = parsedData[parsedData.length - 1].date;
-  const minGrade =
-    Math.floor(Math.min(...parsedData.map((d) => d.grade)) * 10) / 10;
-  const maxGrade =
-    Math.ceil(Math.max(...parsedData.map((d) => d.grade)) * 10) / 10;
-
   // Clear existing SVG content
   svg.innerHTML = "";
 
@@ -303,7 +296,7 @@ function makeChart(chartData) {
 
   const circles = [];
 
-  membersWithCount.forEach((user, index) => {
+  membersWithCount.forEach((user) => {
     const radius =
       minRadius + (user.count / maxCount) * (maxRadius - minRadius);
 
