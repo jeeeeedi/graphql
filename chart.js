@@ -84,7 +84,7 @@ function makeGraph(chartData) {
   const yTicks = [];
   const tickStep = 0.5; // Fixed increment for grade ticks
 
-  // Start from the desired minimum value (1 in this case)
+  // Start from the desired minimum value (0 in this case); end 0.5 after maxGrade
   for (let tick = 0; tick <= maxGrade + 0.5; tick += tickStep) {
     yTicks.push(tick);
   }
@@ -275,7 +275,6 @@ function makeChart(chartData) {
   const svg = document.getElementById("member-chart");
   const width = svg.clientWidth;
   const height = svg.clientHeight;
-  const margin = 40;
 
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
