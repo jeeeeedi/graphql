@@ -125,6 +125,10 @@ export function logout() {
   toggleVisibility("stats", false);
   toggleVisibility("graphs", false);
   setMessage("Logged out!");
+
+  // to clear login-form
+  window.location.reload();
+  document.getElementById("login-form").reset();
 }
 
 // Initialize
